@@ -1,38 +1,45 @@
+import { pool } from "../database/connection";
 import { Task } from "../models/Task";
 
 export class TaskService {
-  private tasks: Task[] = [];
-  private nextId = 1;
+  async create(title: string, description?: string): Promise<Task> {
+    const result = await pool.query(
+      `INSERT INTO tasks (title, description)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [title, description]
+    );
 
-  create(title: string, description: string): Task {
-    const task: Task = {
-      id: this.nextId++,
-      title,
-      description,
-      completed: false,
-    };
-
-    this.tasks.push(task);
-    return task;
+    return result.rows[0];
   }
 
-  findAll(): Task[] {
-    return this.tasks;
+  async findAll(): Promise<Task[]> {
+    const result = await pool.query(
+      "SELECT * FROM tasks ORDER BY id"
+    );
+
+    return result.rows;
   }
 
-  update(id: number, completed: boolean): Task | null {
-    const task = this.tasks.find(t => t.id === id);
-    if (!task) return null;
+  async update(id: number, completed: boolean): Promise<Task | null> {
+    const result = await pool.query(
+      `UPDATE tasks
+       SET completed = $1
+       WHERE id = $2
+       RETURNING *`,
+      [completed, id]
+    );
 
-    task.completed = completed;
-    return task;
+    if (result.rowCount === 0) return null;
+    return result.rows[0];
   }
 
-  delete(id: number): boolean {
-    const index = this.tasks.findIndex(t => t.id === id);
-    if (index === -1) return false;
+  async delete(id: number): Promise<boolean> {
+    const result = await pool.query(
+      "DELETE FROM tasks WHERE id = $1",
+      [id]
+    );
 
-    this.tasks.splice(index, 1);
-    return true;
+    return result.rowCount! > 0;
   }
 }

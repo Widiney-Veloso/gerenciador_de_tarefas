@@ -1,12 +1,28 @@
 import { Router } from "express";
 import { TaskController } from "../controllers/TaskController";
+import { validate } from "../middlewares/validate";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+} from "../schemas/task.schema";
 
-const router = Router();
+const routes = Router();
 const controller = new TaskController();
 
-router.post("/tasks", controller.create);
-router.get("/tasks", controller.findAll);
-router.put("/tasks/:id", controller.update);
-router.delete("/tasks/:id", controller.delete);
+routes.get("/tasks", controller.index);
 
-export default router;
+routes.post(
+  "/tasks",
+  validate(createTaskSchema),
+  controller.store
+);
+
+routes.put(
+  "/tasks/:id",
+  validate(updateTaskSchema),
+  controller.update
+);
+
+routes.delete("/tasks/:id", controller.delete);
+
+export default routes;

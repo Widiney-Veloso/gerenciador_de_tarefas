@@ -1,9 +1,12 @@
 import { Router } from "express";
+import { TaskController } from "../controllers/TaskController";
 
-const router = Router();
+const routes = Router();
+const controller = new TaskController();
 
-router.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "API running" });
-});
+routes.get("/tasks", controller.index);
+routes.post("/tasks", controller.store);
+routes.put("/tasks/:id", controller.update);
+routes.delete("/tasks/:id", controller.delete);
 
-export default router;
+export default routes;

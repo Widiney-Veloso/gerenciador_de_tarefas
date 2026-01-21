@@ -1,39 +1,53 @@
 import { Request, Response } from "express";
 import { TaskService } from "../services/TaskService";
 
-const service = new TaskService();
-
 export class TaskController {
-  create(req: Request, res: Response) {
+  private service = new TaskService();
+
+  index = async (req: Request, res: Response) => {
+    const tasks = await this.service.findAll();
+    return res.json(tasks);
+  };
+
+  store = async (req: Request, res: Response) => {
     const { title, description } = req.body;
-    const task = service.create(title, description);
+
+    if (!title) {
+      return res.status(400).json({
+        error: "Title is required",
+      });
+    }
+
+    const task = await this.service.create(title, description);
     return res.status(201).json(task);
-  }
+  };
 
-  findAll(req: Request, res: Response) {
-    return res.json(service.findAll());
-  }
-
-  update(req: Request, res: Response) {
+  update = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const { completed } = req.body;
 
-    const task = service.update(id, completed);
+    const task = await this.service.update(id, completed);
+
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({
+        error: "Task not found",
+      });
     }
 
     return res.json(task);
-  }
+  };
 
-  delete(req: Request, res: Response) {
+  delete = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const success = service.delete(id);
 
-    if (!success) {
-      return res.status(404).json({ message: "Task not found" });
+    const deleted = await this.service.delete(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        error: "Task not found",
+      });
     }
 
     return res.status(204).send();
-  }
+  };
 }
