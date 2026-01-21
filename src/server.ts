@@ -1,12 +1,6 @@
-import dotenv from "dotenv";
-dotenv.config();
-
-console.log("🚨 server.ts foi carregado");
-
 import app from "./app";
+import { env } from "./config/env";
 
-const PORT = process.env.PORT || 3333;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+app.listen(env.port, () => {
+  console.log(`🚀 Server running on port ${env.port}`);
 });
